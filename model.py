@@ -92,5 +92,5 @@ def get_route(start_lat, start_lon, end_lat, end_lon, date, hour, month, weekday
 
     least_pollution_route = nx.shortest_path(G, src, dst, weight='pollution')
 
-    route_latlon = [(G.nodes[n]['y'], G.nodes[n]['x']) for n in least_pollution_route]
+    route_latlon = [[G.nodes[n]['y'], G.nodes[n]['x']] for n in least_pollution_route]
     return route_latlon
