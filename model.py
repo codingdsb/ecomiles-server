@@ -8,14 +8,15 @@ from shapely.geometry import LineString, Point
 
 def get_route(start_lat, start_lon, end_lat, end_lon, date, hour, month, weekday, weekend):
 
-    G=ox.load_graphml("my_graph.graphml")
-    station_tree=joblib.load("kdtree.pkl")
+    data = joblib.load("all_data.pkl")
+    G = data["G"]
+    station_tree = data["station_tree"]
+    lat_lon_list = data["lat_lon_list"]
+    model = data["model"]
 
     def predict_pollution(lat_lon_list, station_coord, date, hour, month, weekday, weekend ):
         lon, lat = station_coord
-        station_id = lat_lon_list.index((lon, lat)) + 1 
-        
-        model=joblib.load("PM25_model.joblib")
+        station_id = lat_lon_list.index((lon, lat)) + 1  # Assuming station IDs start from 1
         date_early=0
         date_mid=0
         date_late=0
@@ -66,8 +67,6 @@ def get_route(start_lat, start_lon, end_lat, end_lon, date, hour, month, weekday
 
     node_pollution = {}
 
-    lat_lon_list=joblib.load("lat_lon_list.pkl")
-
     for i, node in enumerate(likely_nodes, 1):
         node_lat = G.nodes[node]['y']
         node_lon = G.nodes[node]['x']
@@ -83,6 +82,7 @@ def get_route(start_lat, start_lon, end_lat, end_lon, date, hour, month, weekday
 
         node_pollution[node] = pollution_val
 
+    # Assign pollution-weighted edges
     default_pollution = 40
     for u, v, key, data in G.edges(keys=True, data=True):
         p_u = node_pollution.get(u, default_pollution)
@@ -90,7 +90,8 @@ def get_route(start_lat, start_lon, end_lat, end_lon, date, hour, month, weekday
         avg_pollution = (p_u + p_v) / 2
         data['pollution'] = data['length'] * 5*(avg_pollution)
 
+
     least_pollution_route = nx.shortest_path(G, src, dst, weight='pollution')
 
-    route_latlon = [[G.nodes[n]['y'], G.nodes[n]['x']] for n in least_pollution_route]
+    route_latlon = [(G.nodes[n]['y'], G.nodes[n]['x']) for n in least_pollution_route]
     return route_latlon
