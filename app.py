@@ -9,6 +9,7 @@ app = Flask(__name__)
 
 PORT = os.getenv("PORT")
 PROD = os.getenv("PROD", "false").lower() == "true"
+HOST = os.getenv("HOST")
 
 
 
@@ -36,4 +37,4 @@ def get_route():
     
 
 if __name__ == "__main__":
-    app.run(port=PORT, debug=(not PROD))
+    app.run(host=HOST,port=PORT, debug=(not PROD))
