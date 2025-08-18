@@ -93,5 +93,45 @@ def get_route(start_lat, start_lon, end_lat, end_lon, date, hour, month, weekday
 
     least_pollution_route = nx.shortest_path(G, src, dst, weight='pollution')
 
-    route_latlon = [(G.nodes[n]['y'], G.nodes[n]['x']) for n in least_pollution_route]
+        
+    # # Extract geometry of the path
+    # route_geom = []
+    # for i in range(len(least_pollution_route) - 1):
+    #     u = least_pollution_route[i]
+    #     v = least_pollution_route[i+1]
+    #     # osmnx graph edges are MultiDiGraphs, so we need to iterate through keys
+    #     for key in G.get_edge_data(u, v):
+    #         geom = G.get_edge_data(u, v, key).get('geometry')
+    #         if geom:
+    #             route_geom.append(geom)
+
+
+    # # Flatten into coordinates
+    # full_coords = []
+    # for geom in route_geom:
+    #     if geom is None:  # straight line (no intermediate geometry)
+    #         continue
+    #     coords = list(geom.coords)
+    #     # Ensure coordinates are (latitude, longitude)
+    #     full_coords.extend([(lat, lon) for lon, lat in coords])
+
+    # route is your list of node IDs
+    route_gdf = ox.routing.route_to_gdf(G, least_pollution_route)
+
+    # Extract all coordinates from the geometries
+    full_coords = []
+    for geom in route_gdf.geometry:
+        if geom.geom_type == "LineString":
+            coords = list(geom.coords)
+            full_coords.extend(coords)
+        elif geom.geom_type == "MultiLineString":
+            for line in geom:
+                coords = list(line.coords)
+                full_coords.extend(coords)
+
+    # Flip (lon, lat) → (lat, lon) for Google Maps
+    route_latlon = [(lat, lon) for lon, lat in full_coords]
+
+
+    #route_latlon = [(G.nodes[n]['y'], G.nodes[n]['x']) for n in least_pollution_route]
     return route_latlon

@@ -14,10 +14,9 @@ PROD = os.getenv("PROD", "false").lower() == "true"
 
 @app.route("/api/get-route", methods=["POST"])
 def get_route():
-    
+    print("Hello world!!!!\n\n\n")
     try:
         data = request.get_json()
-        print(f"\n\nDATA\n{type(data)}\n{data}\n\n")
         route = model.get_route(
             start_lat=data["source"]["lat"],
             start_lon=data["source"]["long"],
@@ -29,13 +28,11 @@ def get_route():
             weekday=int(1<=data["day"]<=5),
             weekend=int(6<=data["day"]<=7)
         )
-        print(f"\n\nROUTE\n{route}\n\n")
-    
         return jsonify(route)
     except Exception as e:
         print("\nCustom Error:\n")
         print(e, "\n\n")
-        return jsonify({"hello": "world"})
+        return jsonify({"error": str(e)})
     
 
 if __name__ == "__main__":
