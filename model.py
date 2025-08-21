@@ -8,7 +8,7 @@ from shapely.geometry import LineString, Point
 
 def get_route(start_lat, start_lon, end_lat, end_lon, date, hour, month, weekday, weekend):
 
-    data = joblib.load("all_data.pkl")
+    data = joblib.load("all_data_ver_2.pkl")
     G = data["G"]
     station_tree = data["station_tree"]
     lat_lon_list = data["lat_lon_list"]
@@ -56,7 +56,7 @@ def get_route(start_lat, start_lon, end_lat, end_lon, date, hour, month, weekday
     route_line = LineString(route_coords)
 
     nodes_gdf = ox.graph_to_gdfs(G, edges=False)
-    buffer_meters = 100
+    buffer_meters = 200
     buffer_deg = buffer_meters / 111000
     route_buffer = route_line.buffer(buffer_deg)
     likely_nodes = nodes_gdf[nodes_gdf.geometry.within(route_buffer)].index.tolist()
@@ -88,7 +88,7 @@ def get_route(start_lat, start_lon, end_lat, end_lon, date, hour, month, weekday
         p_u = node_pollution.get(u, default_pollution)
         p_v = node_pollution.get(v, default_pollution)
         avg_pollution = (p_u + p_v) / 2
-        data['pollution'] = data['length'] * 2*(avg_pollution)
+        data['pollution'] = data['length'] * 5*(avg_pollution)
 
 
     least_pollution_route = nx.shortest_path(G, src, dst, weight='pollution')
