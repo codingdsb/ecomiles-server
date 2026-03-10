@@ -15,7 +15,6 @@ HOST = os.getenv("HOST")
 
 @app.route("/api/get-route", methods=["POST"])
 def get_route():
-    print("Hello world!!!!\n\n\n")
     try:
         data = request.get_json()
         route = model.get_route(
